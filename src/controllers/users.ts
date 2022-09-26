@@ -11,7 +11,6 @@ const allUsers = async (req: Request, res: Response) => {
   });
 };
 
-
 const createPerson = async (req: Request, res: Response) => {
   try {
     const { name, classNumber, email, password, phone, dob, photo } = req.body;
@@ -32,62 +31,48 @@ const createPerson = async (req: Request, res: Response) => {
   }
 };
 
-
 const updateUser = async (req: Request, res: Response) => {
   try {
     console.log("idsssssssss", req.body);
     const { name, classNumber, email, password, phone, dob, photo } = req.body;
 
     await UserModel.findByIdAndUpdate(req.params.id, req.body);
-        res.send("User profile updated successfully...")
-
+    res.send("User profile updated successfully...");
   } catch (error) {
     console.log(error);
-    res.status(500).send("Updation failed!!")
+    res.status(500).send("Updation failed!!");
   }
 };
-
-
 
 const updateTheUser = async (req: Request, res: Response) => {
   const cls: any = req.query.classNumber;
   const name: any = req.query.name;
 
-  if(cls == null && name == null){
-    console.log('Please fill all the details....');
-    res.status(500).send("Please fill all the details....")
-    
-  }
-  else if(cls == null ) {
-    console.log('class null');
-    res.status(500).send("Please provide the class number")
-
-  }
-  else if( name == null) {
+  if (cls == null && name == null) {
+    console.log("Please fill all the details....");
+    res.status(500).send("Please fill all the details....");
+  } else if (cls == null) {
+    console.log("class null");
+    res.status(500).send("Please provide the class number");
+  } else if (name == null) {
     console.log("name null");
-    res.status(500).send("Please provide the name")
-
-  }
-  else if (cls && name) {
+    res.status(500).send("Please provide the name");
+  } else if (cls && name) {
     // {"name": { "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
     const update = await UserModel.updateMany(
-      {name: {$regex : name} ,
-      {$set:
-         {classNumber: cls},
-      {$inc : { quantity: 1 }}
-  })
+      { name: { $regex: name } },
+      { $inc: { classNumber: 1 } }
+    );
+    //  {classNumber: cls},
 
-  // console.log('qqqqqqqwww', queries);
-  
-
-}
-
-
+    // console.log('qqqqqqqwww', queries);
+  }
+};
 
 const deletePerson = async (req: Request, res: Response) => {
   try {
     await UserModel.findByIdAndDelete(req.params.id);
-        res.send("User deleted successfully...")
+    res.send("User deleted successfully...");
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -101,135 +86,36 @@ const searchUsers = async (req: Request, res: Response) => {
     let limit = userData.limit || 10;
     let advanceQuery: any;
     advanceQuery = await createAdvanceQuery(userData);
-    console.log('advance query', advanceQuery);
+    console.log("advance query", advanceQuery);
 
     let finalQuery = {};
     console.log(advanceQuery.finalFilterQuery);
     if (advanceQuery.finalFilterQuery) {
-        finalQuery = JSON.parse(`{${advanceQuery.finalFilterQuery}}`);
+      finalQuery = JSON.parse(`{${advanceQuery.finalFilterQuery}}`);
     }
-    console.log(JSON.stringify(finalQuery) );
+    console.log(JSON.stringify(finalQuery));
 
     // let users = await UserModel.find(finalQuery).count();
-    
-    let users = await UserModel.find(finalQuery)
+
+    let users = await UserModel.find(finalQuery);
     // .sort({ createdAt: -1 })
     // .skip(skip).limit(limit);
     // return { users };
 
-    console.log('uuuuusers', users);
-    if(users.length == 0){
-
-      res.send("No users with this details!!!")
-    }else {
+    console.log("uuuuusers", users);
+    if (users.length == 0) {
+      res.send("No users with this details!!!");
+    } else {
       res.json({
         message: "success fetching",
-        data: users
-      })
+        data: users,
+      });
     }
-        
-
   } catch (error) {
-    console.log('errorrrrrrr', error);
-    res.status(500).send(error)
-    
+    console.log("errorrrrrrr", error);
+    res.status(500).send(error);
   }
-
 };
-
-  // try {
-  //   // const users = await UserModel.find();
-  //   // console.log("userssssssssss", users);
-
-  //   const userClass = {
-  //     classNumber: req.body.classNumber,
-  //   };
-
-  //   const userDetails = req.body.userDetails;
-
-  //   // console.log("rrr", userClass);
-  //   // console.log("cccc = ", userDetails);
-
-  //   async function filtering(cls: any, data: any) {
-  //     // console.log("cls", cls);
-  //     // console.log("data", data);
-  //     // console.log("usersdb", db);
-
-  //     if (data) {
-  //       const userCheck = await UserModel.find({
-  //         $and: [
-  //           cls,
-  //           {
-  //             $or: [{ name: data }, { email: data }, { phone: parseInt(data) }],
-  //           },
-  //         ],
-  //       });
-  //       console.log("userchecking with userdetails", userCheck);
-
-  //       res.json({
-  //         message: "Student Details from searchtext",
-  //         data: userCheck,
-  //       });
-  //     } else {
-  //       const user = await UserModel.find(cls);
-  //       console.log("user with class", user);
-
-  //       res.json({
-  //         message: "Student Details from class",
-  //         data: user,
-  //       });
-  //     }
-
-  //     //   for (let i = 0; i < db.length; i++) {
-  //     //     // console.log("dbbbbbbb", db[i]);
-
-  //     //     if (data) {
-  //     //       UserModel.find({});
-  //     //       console.log("matched user details", db[i]);
-
-  //     //       //   return db[i];
-  //     //     }
-
-  //     //     // if (data == name || data == email || data == phone) {
-  //     //     //   UserModel.find({
-  //     //     //     tags: { $elemMatch: {"data" : "data"} }
-  //     //     //   });
-  //     //     //   console.log("matched user det", db[i]);
-
-  //     //     //   //   return db[i];
-  //     //     // }
-  //     //     else if (cls == db[i].classNumber) {
-  //     //       console.log("matched cls", db[i]);
-
-  //     //       //   return db[i];
-  //     //     }
-  //     //     // else if (data[db[i]] == data) {
-
-  //     //     // }
-  //     //     else {
-  //     //       console.log("no student from this address!!!");
-  //     //     }
-  //     //   }
-  //   }
-
-  //   filtering(userClass, userDetails);
-
-  //   // if (!userClass == undefined) {
-
-  //   //     console.log('class not given');
-
-  //   //     res.status(400).json({ message: "Class can not be empty!!" });
-  //   // }
-
-  //   // if(!req.body) {
-  //   //     res.json({
-  //   //         message: "Please Fill the column"
-  //   //     })
-  //   // }
-  // } catch (error) {
-  //   console.log(error);
-  // }
-
 
 function createAdvanceQuery(reqData: any) {
   return new Promise((res, rej) => {
@@ -238,55 +124,46 @@ function createAdvanceQuery(reqData: any) {
     let isEmpty = Object.values(reqData).every((x) => x === null || x === "");
     let objKeys = Object.keys(reqData);
 
-    if(isEmpty) {
+    if (isEmpty) {
       res("");
       return;
     }
 
-    for(let i = 0; i<objKeys.length; i++) {
-    //  console.log('obbbbbbbbbb', objKeys[i]);
-    //  console.log('occcccccccc', reqData[objKeys[i]]);
+    for (let i = 0; i < objKeys.length; i++) {
+      //  console.log('obbbbbbbbbb', objKeys[i]);
+      //  console.log('occcccccccc', reqData[objKeys[i]]);
 
-     if (reqData[objKeys[i]] != null && reqData[objKeys[i]] != undefined 
-      // && objKeys[i] != "skip" && objKeys[i] != "limit" && objKeys[i] != "sort" 
-      //  && objKeys[i] != "orderBy"
-       ) 
-      {
-
+      if (
+        reqData[objKeys[i]] != null &&
+        reqData[objKeys[i]] != undefined
+        // && objKeys[i] != "skip" && objKeys[i] != "limit" && objKeys[i] != "sort"
+        //  && objKeys[i] != "orderBy"
+      ) {
         if (objKeys[i] == "classNumber" && reqData[objKeys[i]] != "") {
           // console.log('qqqqqqqqq', reqData[objKeys[i]]);
-        
-          appendQuery +=   `"classNumber": { "$in":  ${reqData[objKeys[i]]} } ,`
-          // console.log('insideeeeee');
-        }
-        else if (objKeys[i] == "searchText" && reqData[objKeys[i]] != ""){
 
-        // console.log('else if entered...');
-        
-        
+          appendQuery += `"classNumber": { "$in":  ${reqData[objKeys[i]]} } ,`;
+          // console.log('insideeeeee');
+        } else if (objKeys[i] == "searchText" && reqData[objKeys[i]] != "") {
+          // console.log('else if entered...');
+
           appendQuery += `"$or": [
             
             {"name": { "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
             {"email":{ "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
             {"phone":{ "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }}
           
-              ] ,`
-          
+              ] ,`;
         }
-
       }
-    }           
-      
+    }
 
-  let n = appendQuery.lastIndexOf(",");
-  let finalFilterQuery = appendQuery.slice(0, n);
-  console.log(JSON.stringify(finalFilterQuery))
-  res({ finalFilterQuery: finalFilterQuery });
-
-    })
-
-  }
-
+    let n = appendQuery.lastIndexOf(",");
+    let finalFilterQuery = appendQuery.slice(0, n);
+    console.log(JSON.stringify(finalFilterQuery));
+    res({ finalFilterQuery: finalFilterQuery });
+  });
+}
 
 export {
   allUsers,

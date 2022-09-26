@@ -1,7 +1,8 @@
 import mongoose, {connect} from 'mongoose'
 
 function connects () {
-    return connect('mongodb://localhost:27017/crud')
+    
+    return connect('mongodb+srv://jayakrishnan:VROLYJriRQDoDhHj@crud.xfz2ixo.mongodb.net/test')
     .then(() => {
         console.log('DB connected successfully');
         

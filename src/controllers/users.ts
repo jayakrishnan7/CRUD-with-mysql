@@ -3,36 +3,27 @@ import UserModel from "../models/users";
 
 // import { createUser, findAndUpdate, findUser, deleteUser } from '../services/users.service';
 
-// const homeDetail = async (req: Request, res: Response) => {
-//   let myData = await UserModel.find();
-
-//   res.json({
-//     message: "Users Page",
-//     myData: myData,
-//   });
-// };
-
-const homeDetail = async (req: Request, res: Response) => {
-  // let myData = await UserModel.find();
-  // res.json({
-  //   message: "Users Page",
-  //   myData: myData,
-  // });
+const allUsers = async (req: Request, res: Response) => {
+  let myData = await UserModel.find();
+  res.json({
+    message: "Users Page",
+    myData: myData,
+  });
 };
+
 
 const createPerson = async (req: Request, res: Response) => {
   try {
     const { name, classNumber, email, password, phone, dob, photo } = req.body;
 
-    console.log("cameeeee");
+    // console.log("cameeeee");
     const user = await UserModel.create(req.body);
     console.log("uuuuuu  user", user);
 
     res.status(201).json({ user: user._id, created: true });
   } catch (error) {
     console.log("errrrr", error);
-    // const errors = handleErrors(error);
-    res.json({
+    res.status(500).json({
       // message: "User email already exist",
       error,
       // errors,
@@ -41,41 +32,65 @@ const createPerson = async (req: Request, res: Response) => {
   }
 };
 
+
 const updateUser = async (req: Request, res: Response) => {
-  try {
-    console.log(req.params.id);
-
-    const user = await UserModel.findById(req.params.id);
-    res.json({ user });
-  } catch (error: any) {
-    console.log(error.message);
-  }
-};
-
-const userUpdating = async (req: Request, res: Response) => {
   try {
     console.log("idsssssssss", req.body);
     const { name, classNumber, email, password, phone, dob, photo } = req.body;
 
     await UserModel.findByIdAndUpdate(req.params.id, req.body);
-    res.json({
-      message: "User Profile Updated successfully",
-    });
+        res.send("User profile updated successfully...")
+
   } catch (error) {
     console.log(error);
-    res.json({ message: "Updation failed" });
+    res.status(500).send("Updation failed!!")
   }
 };
+
+
+
+const updateTheUser = async (req: Request, res: Response) => {
+  const cls: any = req.query.classNumber;
+  const name: any = req.query.name;
+
+  if(cls == null && name == null){
+    console.log('Please fill all the details....');
+    res.status(500).send("Please fill all the details....")
+    
+  }
+  else if(cls == null ) {
+    console.log('class null');
+    res.status(500).send("Please provide the class number")
+
+  }
+  else if( name == null) {
+    console.log("name null");
+    res.status(500).send("Please provide the name")
+
+  }
+  else if (cls && name) {
+    // {"name": { "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
+    const update = await UserModel.updateMany(
+      {name: {$regex : name} ,
+      {$set:
+         {classNumber: cls},
+      {$inc : { quantity: 1 }}
+  })
+
+  // console.log('qqqqqqqwww', queries);
+  
+
+}
+
+
 
 const deletePerson = async (req: Request, res: Response) => {
   try {
     await UserModel.findByIdAndDelete(req.params.id);
-    res.json({
-      message: "User Deleted Successfully",
-    });
+        res.send("User deleted successfully...")
   } catch (error) {
     console.log(error);
-    res.json(error);
+    res.status(500).send(error);
   }
 };
 
@@ -86,28 +101,37 @@ const searchUsers = async (req: Request, res: Response) => {
     let limit = userData.limit || 10;
     let advanceQuery: any;
     advanceQuery = await createAdvanceQuery(userData);
-    console.log('addvv', advanceQuery);
+    console.log('advance query', advanceQuery);
 
     let finalQuery = {};
     console.log(advanceQuery.finalFilterQuery);
     if (advanceQuery.finalFilterQuery) {
         finalQuery = JSON.parse(`{${advanceQuery.finalFilterQuery}}`);
     }
-    console.log("loggggg", finalQuery.toString());
+    console.log(JSON.stringify(finalQuery) );
+
     // let users = await UserModel.find(finalQuery).count();
+    
     let users = await UserModel.find(finalQuery)
     // .sort({ createdAt: -1 })
     // .skip(skip).limit(limit);
     // return { users };
-    res.json({
-      message: "success fetching",
-      data: users
-    })
-    // return true;
-    
+
+    console.log('uuuuusers', users);
+    if(users.length == 0){
+
+      res.send("No users with this details!!!")
+    }else {
+      res.json({
+        message: "success fetching",
+        data: users
+      })
+    }
+        
 
   } catch (error) {
     console.log('errorrrrrrr', error);
+    res.status(500).send(error)
     
   }
 
@@ -242,22 +266,17 @@ function createAdvanceQuery(reqData: any) {
         
           appendQuery += `"$or": [
             
-            {"name":{ "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
+            {"name": { "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
             {"email":{ "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
             {"phone":{ "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }}
           
               ] ,`
           
-            
         }
 
       }
     }           
       
-  // console.log(JSON.stringify(appendQuery))
-  // console.log('appendqueryyyyyyy');
-      
-  // res({appendQuery})
 
   let n = appendQuery.lastIndexOf(",");
   let finalFilterQuery = appendQuery.slice(0, n);
@@ -270,10 +289,10 @@ function createAdvanceQuery(reqData: any) {
 
 
 export {
-  homeDetail,
+  allUsers,
   createPerson,
   updateUser,
-  userUpdating,
+  updateTheUser,
   deletePerson,
   searchUsers,
 };

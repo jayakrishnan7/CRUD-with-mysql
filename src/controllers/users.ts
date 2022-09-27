@@ -114,6 +114,7 @@ const deletePerson = async (req: Request, res: Response) => {
 };
 
 const searchUsers = async (req: Request, res: Response) => {
+
   try {
     let userData = req.body;
     let skip = userData.skip || 0;
@@ -130,6 +131,9 @@ const searchUsers = async (req: Request, res: Response) => {
     // console.log(JSON.stringify(finalQuery));
 
     // let users = await UserModel.find(finalQuery).count();
+
+    // console.log('ffffffffff', finalQuery);
+    
 
     let users = await UserModel.find(finalQuery).skip(skip).limit(limit);
     // .sort({ createdAt: -1 })

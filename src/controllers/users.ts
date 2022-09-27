@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import moment from "moment";
 import UserModel from "../models/users";
 
-moment().format();
 
 
 // import { createUser, findAndUpdate, findUser, deleteUser } from '../services/users.service';
@@ -29,6 +28,8 @@ const createPerson = async (req: Request, res: Response) => {
     console.log('doooooooo', req.body.dob);
 
     const newDate = moment.utc( dateIn, "DD/MM/YYYY").toDate()
+    moment().format();
+
 
     // console.log('newwwwwwwwww', newDate);
     
@@ -47,14 +48,6 @@ const createPerson = async (req: Request, res: Response) => {
 
     console.log('userdddddddddddd', userData);
     
-
-
-    // var newDateObj: any = moment(tripData.pickupTime)
-      // .add(tripData.estimatedTime / 60, "m")
-      // .format(format1);
-    
-    
-
     const user = await UserModel.create(userData);
 
     // console.log("uuuuuu  user", user);

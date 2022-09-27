@@ -4,7 +4,12 @@ import UserModel from "../models/users";
 // import { createUser, findAndUpdate, findUser, deleteUser } from '../services/users.service';
 
 const allUsers = async (req: Request, res: Response) => {
-  let myData = await UserModel.find();
+
+  let skip =  0;
+  let limit =  10;
+
+
+  let myData = await UserModel.find().skip(skip).limit(limit);
   res.json({
     message: "Users Page",
     myData: myData,
@@ -112,7 +117,7 @@ const searchUsers = async (req: Request, res: Response) => {
 
     // let users = await UserModel.find(finalQuery).count();
 
-    let users = await UserModel.find(finalQuery);
+    let users = await UserModel.find(finalQuery).skip(skip).limit(limit);
     // .sort({ createdAt: -1 })
     // .skip(skip).limit(limit);
     // return { users };
@@ -153,7 +158,8 @@ function createAdvanceQuery(reqData: any) {
       if (
         reqData[objKeys[i]] != null &&
         reqData[objKeys[i]] != undefined
-        // && objKeys[i] != "skip" && objKeys[i] != "limit" && objKeys[i] != "sort"
+        // && objKeys[i] != "skip" && objKeys[i] != "limit" 
+        // && objKeys[i] != "sort"
         //  && objKeys[i] != "orderBy"
       ) {
         if (objKeys[i] == "classNumber" && reqData[objKeys[i]] != "") {

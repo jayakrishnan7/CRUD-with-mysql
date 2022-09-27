@@ -2,15 +2,13 @@ import express, { Request, Response } from "express";
 import moment from "moment";
 import UserModel from "../models/users";
 
+//importing crypto module to generate random binary data
+var CryptoJS = require("crypto-js");
 
-
-// import { createUser, findAndUpdate, findUser, deleteUser } from '../services/users.service';
-
+// ....... all users fetching....................
 const allUsers = async (req: Request, res: Response) => {
-
-  let skip =  0;
-  let limit =  10;
-
+  let skip = 0;
+  let limit = 10;
 
   let myData = await UserModel.find().skip(skip).limit(limit);
   res.json({
@@ -19,52 +17,65 @@ const allUsers = async (req: Request, res: Response) => {
   });
 };
 
+// .......  user  sign up   ....................
 const createPerson = async (req: Request, res: Response) => {
   try {
     const { name, classNumber, email, password, phone, dob, photo } = req.body;
 
-    const dateIn = req.body.dob;
-    // const newDate = dateIn.Date.parse();
-    console.log('doooooooo', req.body.dob);
+    const pswd = req.body.password;
 
-    const newDate = moment.utc( dateIn, "DD/MM/YYYY").toDate()
+    // ...........................................password.encrypting............................................
+    var ciphertext = CryptoJS.AES.encrypt(pswd, "crud secret 763").toString();
+
+    console.log("encrypted text ....... cipherrrrrr", ciphertext);
+
+    const dateIn = req.body.dob;
+
+    const newDate = moment.utc(dateIn, "DD/MM/YYYY").toDate();
     moment().format();
 
-
     // console.log('newwwwwwwwww', newDate);
-    
-    console.log('typeeeeee of neww--------', typeof(newDate));
 
     const userData = {
       name: req.body.name,
       classNumber: req.body.classNumber,
       email: req.body.email,
-      password: req.body.password,
+      password: ciphertext,
       phone: req.body.phone,
       dob: newDate,
       photo: req.body.photo,
-      
-    }
+    };
 
-    console.log('userdddddddddddd', userData);
-    
+    // console.log("userdddddddddddd", userData);
+
     const user = await UserModel.create(userData);
 
     // console.log("uuuuuu  user", user);
 
-    res.status(201).json({ user: user._id, created: true });
+    // ...........................................password.decrypting.....................................................
 
+    const decryptUser = userData.password;
+
+    // console.log('deccccccrypt userrr', decryptUser);
+
+    var bytes = CryptoJS.AES.decrypt(decryptUser, "crud secret 763");
+    var originalText = bytes.toString(CryptoJS.enc.Utf8);
+
+    console.log("decrypted password..........", originalText);
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    res.status(201).json({ user: user._id, created: true });
   } catch (error) {
     console.log("errrrr", error);
     res.status(500).json({
-      // message: "User email already exist",
       error,
-      // errors,
       created: false,
     });
   }
 };
 
+// ....... edit user....................
 const updateUser = async (req: Request, res: Response) => {
   try {
     // console.log("idsssssssss", req.body);
@@ -72,59 +83,54 @@ const updateUser = async (req: Request, res: Response) => {
 
     const data = await UserModel.findByIdAndUpdate(req.params.id, req.body);
     res.json({ message: "User profile updated successfully...", data: data });
-
   } catch (error) {
     console.log(error);
     res.status(500).send("Updation failed!!");
   }
 };
 
+// ....... edit user with classnumber....................
 const updateTheUser = async (req: Request, res: Response) => {
-
   try {
-    console.log('updating userrr');
-    
+    console.log("updating userrr");
+
     const classNumber: any = req.query.classNumber;
     const name: any = req.query.name;
 
-    const classNum = parseInt(classNumber) 
-  
+    const classNum = parseInt(classNumber);
+
     // console.log('reaach', typeof(classNum));
 
-    if (!classNum && !name ) {
+    if (!classNum && !name) {
       console.log("Please fill all the details....");
       res.status(500).send("Please fill all the details....");
-    } else if ( !classNum ) {
+    } else if (!classNum) {
       console.log("class null");
       res.status(500).send("Please provide the class number");
-    } else if (!name ) {
+    } else if (!name) {
       console.log("name null");
       res.status(500).send("Please provide the name");
     } else if (classNum && name) {
-
-      // {"name": { "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
       const update = await UserModel.updateMany(
-        { name: { $regex: name } , classNumber: classNum },
+        { name: { $regex: name }, classNumber: classNum },
         { $inc: { classNumber: 1 } }
-      ); 
+      );
 
-      const updatedData = await UserModel.find(
-        { name: { $regex: name } , classNumber: classNum+1 }
-      )
+      const updatedData = await UserModel.find({
+        name: { $regex: name },
+        classNumber: classNum + 1,
+      });
 
-      console.log('updatedddd', updatedData);
-      
-      res.json({message: "success. class incremented...", data: updatedData})
+      // console.log("updatedddd", updatedData);
+
+      res.json({ message: "success. class incremented...", data: updatedData });
     }
- 
   } catch (error) {
-    res.status(500).send("Class not incremented. error!!!")
+    res.status(500).send("Class not incremented. error!!!");
   }
-    
 };
 
-
-
+// ....... delete user...................
 const deletePerson = async (req: Request, res: Response) => {
   try {
     await UserModel.findByIdAndDelete(req.params.id);
@@ -135,8 +141,8 @@ const deletePerson = async (req: Request, res: Response) => {
   }
 };
 
+// ....... search users....................
 const searchUsers = async (req: Request, res: Response) => {
-
   try {
     let userData = req.body;
     let skip = userData.skip || 0;
@@ -152,17 +158,12 @@ const searchUsers = async (req: Request, res: Response) => {
     }
     // console.log(JSON.stringify(finalQuery));
 
-    // let users = await UserModel.find(finalQuery).count();
-
     // console.log('ffffffffff', finalQuery);
-    
 
     let users = await UserModel.find(finalQuery).skip(skip).limit(limit);
-    // .sort({ createdAt: -1 })
-    // .skip(skip).limit(limit);
-    // return { users };
 
-    console.log("uuuuusers", users);
+    // console.log("uuuuusers", users);
+
     if (users.length == 0) {
       res.send("No users with this details!!!");
     } else {
@@ -176,7 +177,6 @@ const searchUsers = async (req: Request, res: Response) => {
     res.status(500).send(error);
   }
 };
-
 
 // function of searching users...................
 function createAdvanceQuery(reqData: any) {
@@ -195,18 +195,12 @@ function createAdvanceQuery(reqData: any) {
       //  console.log('obbbbbbbbbb', objKeys[i]);
       //  console.log('occcccccccc', reqData[objKeys[i]]);
 
-      if (
-        reqData[objKeys[i]] != null &&
-        reqData[objKeys[i]] != undefined
-        // && objKeys[i] != "skip" && objKeys[i] != "limit" 
-        // && objKeys[i] != "sort"
-        //  && objKeys[i] != "orderBy"
-      ) {
+      if (reqData[objKeys[i]] != null && reqData[objKeys[i]] != undefined) {
         if (objKeys[i] == "classNumber" && reqData[objKeys[i]] != "") {
           // console.log('qqqqqqqqq', reqData[objKeys[i]]);
 
           appendQuery += `"classNumber": { "$in":  ${reqData[objKeys[i]]} } ,`;
-          // console.log('insideeeeee');
+          // console.log('insideeeeee entereddddddd');
         } else if (objKeys[i] == "searchText" && reqData[objKeys[i]] != "") {
           // console.log('else if entered...');
 

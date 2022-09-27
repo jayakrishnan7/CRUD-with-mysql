@@ -1,35 +1,34 @@
-import express, {Request, Response} from 'express';
+import express from 'express';
 import { router } from "./routes/routes";
 import connects  from './config/db';
 
+// cross origin resource sharing............
 const cors = require('cors');
+
+// morgan for logs............
 const morgan = require('morgan');
 
 const app = express();
 
 const PORT = 4001; 
 
-// db connection
+// db connection.............
 connects();
 
-//parse json bodies...............
+//parse json bodies...........
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.use(morgan('tiny'));
 
+//cors........................
 app.use(cors({
     origin: ['http://localhost:4200'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
 
-// routes
+// route ......................
 app.use('/', router);
-
-app.get('/test', (req: Request, res: Response) : void => {
-    res.json({data: "test page"})
-})
 
 
 // server connection

@@ -17,7 +17,7 @@ const createPerson = async (req: Request, res: Response) => {
 
     // console.log("cameeeee");
     const user = await UserModel.create(req.body);
-    console.log("uuuuuu  user", user);
+    // console.log("uuuuuu  user", user);
 
     res.status(201).json({ user: user._id, created: true });
   } catch (error) {
@@ -33,11 +33,12 @@ const createPerson = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
   try {
-    console.log("idsssssssss", req.body);
+    // console.log("idsssssssss", req.body);
     const { name, classNumber, email, password, phone, dob, photo } = req.body;
 
-    await UserModel.findByIdAndUpdate(req.params.id, req.body);
-    res.send("User profile updated successfully...");
+    const data = await UserModel.findByIdAndUpdate(req.params.id, req.body);
+    res.json({ message: "User profile updated successfully...", data: data });
+
   } catch (error) {
     console.log(error);
     res.status(500).send("Updation failed!!");
@@ -45,29 +46,43 @@ const updateUser = async (req: Request, res: Response) => {
 };
 
 const updateTheUser = async (req: Request, res: Response) => {
-  const cls: any = req.query.classNumber;
-  const name: any = req.query.name;
 
-  if (cls == null && name == null) {
-    console.log("Please fill all the details....");
-    res.status(500).send("Please fill all the details....");
-  } else if (cls == null) {
-    console.log("class null");
-    res.status(500).send("Please provide the class number");
-  } else if (name == null) {
-    console.log("name null");
-    res.status(500).send("Please provide the name");
-  } else if (cls && name) {
-    // {"name": { "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
-    const update = await UserModel.updateMany(
-      { name: { $regex: name } },
-      { $inc: { classNumber: 1 } }
-    );
-    //  {classNumber: cls},
+  try {
+    console.log('updating userrr');
+    
+    const classNumber: any = req.query.classNumber;
+    const name: any = req.query.name;
 
-    // console.log('qqqqqqqwww', queries);
+    const classNum = parseInt(classNumber) 
+  
+    // console.log('reaach', typeof(classNum));
+
+    if (!classNum && !name ) {
+      console.log("Please fill all the details....");
+      res.status(500).send("Please fill all the details....");
+    } else if ( !classNum ) {
+      console.log("class null");
+      res.status(500).send("Please provide the class number");
+    } else if (!name ) {
+      console.log("name null");
+      res.status(500).send("Please provide the name");
+    } else if (classNum && name) {
+
+      // {"name": { "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
+      const update = await UserModel.updateMany(
+        { name: { $regex: name } },
+        { $inc: { classNumber: 1 } }
+      ); 
+      res.json({message: "success. class incremented...", data: update})
+    }
+ 
+  } catch (error) {
+    res.status(500).send("Class not incremented. error!!!")
   }
+    
 };
+
+
 
 const deletePerson = async (req: Request, res: Response) => {
   try {
@@ -86,14 +101,14 @@ const searchUsers = async (req: Request, res: Response) => {
     let limit = userData.limit || 10;
     let advanceQuery: any;
     advanceQuery = await createAdvanceQuery(userData);
-    console.log("advance query", advanceQuery);
+    // console.log("advance query", advanceQuery);
 
     let finalQuery = {};
-    console.log(advanceQuery.finalFilterQuery);
+    // console.log(advanceQuery.finalFilterQuery);
     if (advanceQuery.finalFilterQuery) {
       finalQuery = JSON.parse(`{${advanceQuery.finalFilterQuery}}`);
     }
-    console.log(JSON.stringify(finalQuery));
+    // console.log(JSON.stringify(finalQuery));
 
     // let users = await UserModel.find(finalQuery).count();
 
@@ -117,6 +132,8 @@ const searchUsers = async (req: Request, res: Response) => {
   }
 };
 
+
+// function of searching users...................
 function createAdvanceQuery(reqData: any) {
   return new Promise((res, rej) => {
     let appendQuery = "";

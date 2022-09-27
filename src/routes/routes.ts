@@ -5,10 +5,10 @@ const router = express.Router();
 
 router.post('/register', createPerson)
 
-router.put("/updating/:id", updateUser);
+router.put("/updateUser/:id", updateUser);
 
 // new route....
-router.put("/updateUser", updateTheUser);
+router.put("/updateUserWithClass", updateTheUser);
 //...............
 
 router.delete("/delete/:id", deletePerson);

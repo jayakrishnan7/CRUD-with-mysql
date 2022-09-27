@@ -1,5 +1,9 @@
 import express, { Request, Response } from "express";
+import moment from "moment";
 import UserModel from "../models/users";
+
+moment().format();
+
 
 // import { createUser, findAndUpdate, findUser, deleteUser } from '../services/users.service';
 
@@ -20,18 +24,43 @@ const createPerson = async (req: Request, res: Response) => {
   try {
     const { name, classNumber, email, password, phone, dob, photo } = req.body;
 
-    // const dateIn = req.body.dob;
+    const dateIn = req.body.dob;
     // const newDate = dateIn.Date.parse();
-    console.log('doooooooo');
-    
-    // const dateParse =  parseDate
-    // const dateStr = (req.body.dob.getMonth()+1) + '/' + req.body.dob.getDate() + '/' + req.body.dob.getFullYear();
+    console.log('doooooooo', req.body.dob);
 
-    // console.log("cameeeee", dateStr);
-    const user = await UserModel.create(req.body);
+    const newDate = moment.utc( dateIn, "DD/MM/YYYY").toDate()
+
+    // console.log('newwwwwwwwww', newDate);
+    
+    console.log('typeeeeee of neww--------', typeof(newDate));
+
+    const userData = {
+      name: req.body.name,
+      classNumber: req.body.classNumber,
+      email: req.body.email,
+      password: req.body.password,
+      phone: req.body.phone,
+      dob: newDate,
+      photo: req.body.photo,
+      
+    }
+
+    console.log('userdddddddddddd', userData);
+    
+
+
+    // var newDateObj: any = moment(tripData.pickupTime)
+      // .add(tripData.estimatedTime / 60, "m")
+      // .format(format1);
+    
+    
+
+    const user = await UserModel.create(userData);
+
     // console.log("uuuuuu  user", user);
 
     res.status(201).json({ user: user._id, created: true });
+
   } catch (error) {
     console.log("errrrr", error);
     res.status(500).json({

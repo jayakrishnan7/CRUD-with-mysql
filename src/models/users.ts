@@ -35,7 +35,7 @@ const userSchema = new Schema
     required: true,
   },
   dob: {
-    type: Date,
+    type: Date ,
     required: true,
   },
   photo: {

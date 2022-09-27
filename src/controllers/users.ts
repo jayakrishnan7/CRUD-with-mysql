@@ -20,7 +20,14 @@ const createPerson = async (req: Request, res: Response) => {
   try {
     const { name, classNumber, email, password, phone, dob, photo } = req.body;
 
-    // console.log("cameeeee");
+    // const dateIn = req.body.dob;
+    // const newDate = dateIn.Date.parse();
+    console.log('doooooooo');
+    
+    // const dateParse =  parseDate
+    // const dateStr = (req.body.dob.getMonth()+1) + '/' + req.body.dob.getDate() + '/' + req.body.dob.getFullYear();
+
+    // console.log("cameeeee", dateStr);
     const user = await UserModel.create(req.body);
     // console.log("uuuuuu  user", user);
 
@@ -75,10 +82,17 @@ const updateTheUser = async (req: Request, res: Response) => {
 
       // {"name": { "$regex" : "${reqData[objKeys[i]]}", "$options": "i" }},
       const update = await UserModel.updateMany(
-        { name: { $regex: name } },
+        { name: { $regex: name } , classNumber: classNum },
         { $inc: { classNumber: 1 } }
       ); 
-      res.json({message: "success. class incremented...", data: update})
+
+      const updatedData = await UserModel.find(
+        { name: { $regex: name } , classNumber: classNum+1 }
+      )
+
+      console.log('updatedddd', updatedData);
+      
+      res.json({message: "success. class incremented...", data: updatedData})
     }
  
   } catch (error) {

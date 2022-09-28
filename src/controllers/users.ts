@@ -66,6 +66,7 @@ const createPerson = async (req: Request, res: Response) => {
     // ------------------------------------------------------------------------------------------------------------------
 
     res.status(201).json({ user: user._id, created: true });
+    
   } catch (error) {
     console.log("errrrr", error);
     res.status(500).json({

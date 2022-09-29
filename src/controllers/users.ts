@@ -10,17 +10,33 @@ const allUsers = async (req: Request, res: Response) => {
   let skip = 0;
   let limit = 10;
 
-  let myData = await UserModel.find().skip(skip).limit(limit);
+  let myData = await UserModel.find().skip(skip);
+  // .limit(limit);
+
+  // console.log('mydddddddd', myData);
+
+  // let newUserData: any = myData.map((x) => {
+
+  //   x.password = "********";
+
+  //   return x;
+
+  // })
+
+  // console.log('its newwwwwww', newUserData);
+
   res.json({
     message: "Users Page",
     myData: myData,
+    // newUserData,
   });
 };
 
 // .......  user  sign up   ....................
 const createPerson = async (req: Request, res: Response) => {
   try {
-    const { name, classNumber, email, password, phone, dob, photo } = req.body;
+    const { name, classNumber, email, password, phone, dob, photo, isDeleted } =
+      req.body;
 
     const pswd = req.body.password;
 
@@ -44,13 +60,14 @@ const createPerson = async (req: Request, res: Response) => {
       phone: req.body.phone,
       dob: newDate,
       photo: req.body.photo,
+      isDeleted: req.body.isDeleted,
     };
 
     // console.log("userdddddddddddd", userData);
 
     const user = await UserModel.create(userData);
 
-    // console.log("uuuuuu  user", user);
+    console.log("uuuuuu  user", user);
 
     // ...........................................password.decrypting.....................................................
 
@@ -61,12 +78,11 @@ const createPerson = async (req: Request, res: Response) => {
     var bytes = CryptoJS.AES.decrypt(decryptUser, "crud secret 763");
     var originalText = bytes.toString(CryptoJS.enc.Utf8);
 
-    console.log("decrypted password..........", originalText);
+    // console.log("decrypted password..........", originalText);
 
     // ------------------------------------------------------------------------------------------------------------------
 
     res.status(201).json({ user: user._id, created: true });
-    
   } catch (error) {
     console.log("errrrr", error);
     res.status(500).json({
@@ -80,7 +96,8 @@ const createPerson = async (req: Request, res: Response) => {
 const updateUser = async (req: Request, res: Response) => {
   try {
     // console.log("idsssssssss", req.body);
-    const { name, classNumber, email, password, phone, dob, photo } = req.body;
+    const { name, classNumber, email, password, phone, dob, photo, isDeleted } =
+      req.body;
 
     const data = await UserModel.findByIdAndUpdate(req.params.id, req.body);
     res.json({ message: "User profile updated successfully...", data: data });
@@ -132,10 +149,23 @@ const updateTheUser = async (req: Request, res: Response) => {
 };
 
 // ....... delete user...................
+// const deletePerson = async (req: Request, res: Response) => {
+//   try {
+//     await UserModel.findByIdAndDelete(req.params.id);
+//     res.send("User deleted successfully...");
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send(error);
+//   }
+// };
+
+// .......soft delete user...................
 const deletePerson = async (req: Request, res: Response) => {
   try {
-    await UserModel.findByIdAndDelete(req.params.id);
+    const person: any = await UserModel.updateOne({ _id: req.params.id }, {$set: { isDeleted: true }});
+
     res.send("User deleted successfully...");
+
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -146,7 +176,7 @@ const deletePerson = async (req: Request, res: Response) => {
 const searchUsers = async (req: Request, res: Response) => {
   try {
     let userData = req.body;
-    let skip = userData.skip || 0;
+    // let skip = userData.skip || 0;
     let limit = userData.limit || 10;
     let advanceQuery: any;
     advanceQuery = await createAdvanceQuery(userData);
@@ -161,9 +191,22 @@ const searchUsers = async (req: Request, res: Response) => {
 
     // console.log('ffffffffff', finalQuery);
 
-    let users = await UserModel.find(finalQuery).skip(skip).limit(limit);
+    let totalCount = await UserModel.find(finalQuery).count();
+    let users = await UserModel.find(finalQuery).limit(limit);
 
     // console.log("uuuuusers", users);
+
+    // console.log('nameee', users[0].password);
+
+    // const newUser  = {
+    //   name : users[0].name,
+    //   classNumber : users[0].classNumber,
+    //   email : users[0].email,
+    //   password : users[0].password,
+    //   phone : users[0].phone,
+    //   dob : users[0].dob,
+    //   photo: users[0].photo
+    // }
 
     if (users.length == 0) {
       res.send("No users with this details!!!");
@@ -171,6 +214,7 @@ const searchUsers = async (req: Request, res: Response) => {
       res.json({
         message: "success fetching",
         data: users,
+        totalCount,
       });
     }
   } catch (error) {
@@ -200,7 +244,7 @@ function createAdvanceQuery(reqData: any) {
         if (objKeys[i] == "classNumber" && reqData[objKeys[i]] != "") {
           // console.log('qqqqqqqqq', reqData[objKeys[i]]);
 
-          appendQuery += `"classNumber": { "$in":  ${reqData[objKeys[i]]} } ,`;
+          appendQuery += `"classNumber": ${reqData[objKeys[i]]}  ,`;
           // console.log('insideeeeee entereddddddd');
         } else if (objKeys[i] == "searchText" && reqData[objKeys[i]] != "") {
           // console.log('else if entered...');
@@ -218,7 +262,7 @@ function createAdvanceQuery(reqData: any) {
 
     let n = appendQuery.lastIndexOf(",");
     let finalFilterQuery = appendQuery.slice(0, n);
-    console.log(JSON.stringify(finalFilterQuery));
+    // console.log(JSON.stringify(finalFilterQuery));
     res({ finalFilterQuery: finalFilterQuery });
   });
 }

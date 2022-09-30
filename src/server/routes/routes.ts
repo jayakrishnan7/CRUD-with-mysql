@@ -3,6 +3,7 @@ import {
   createPerson,
   deletePerson,
   searchUsers,
+  exportUsers,
   allUsers,
   updateUser,
   updateTheUser,
@@ -21,6 +22,8 @@ router.put("/updateUserWithClass", updateTheUser);
 router.delete("/delete/:id", deletePerson);
 
 router.post("/search", searchUsers);
+
+router.get("/downloadExcel", exportUsers);
 
 router.get("/", allUsers);
 

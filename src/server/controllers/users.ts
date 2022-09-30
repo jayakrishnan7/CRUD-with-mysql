@@ -100,7 +100,7 @@ const updateUser = async (req: Request, res: Response) => {
       req.body;
 
     const data = await UserModel.findByIdAndUpdate(req.params.id, req.body);
-    res.json({ message: "User profile updated successfully...", data: data });
+    res.json({ message: "User profile updated successfully..." });
   } catch (error) {
     console.log(error);
     res.status(500).send("Updation failed!!");
@@ -271,6 +271,16 @@ function createAdvanceQuery(reqData: any) {
   });
 }
 
+const exportUsers = async (req: Request, res: Response) => {
+
+  try {
+    
+  } catch (error) {
+    
+  }
+
+}
+
 export {
   allUsers,
   createPerson,
@@ -278,4 +288,5 @@ export {
   updateTheUser,
   deletePerson,
   searchUsers,
+  exportUsers
 };

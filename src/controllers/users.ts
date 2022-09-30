@@ -166,7 +166,9 @@ const deletePerson = async (req: Request, res: Response) => {
   try {
     const person: any = await UserModel.updateOne({ _id: req.params.id }, {$set: { isDeleted: true }});
 
-    res.send("User deleted successfully...");
+    res.json({
+      message: "User deleted Successfully.."
+    })
 
   } catch (error) {
     console.log(error);

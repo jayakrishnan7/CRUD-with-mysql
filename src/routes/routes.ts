@@ -14,9 +14,9 @@ router.post("/register", createPerson);
 
 router.put("/updateUser/:id", updateUser);
 
-// update the class no....
+// update the class no incrementing one....
 router.put("/updateUserWithClass", updateTheUser);
-//-----------------------
+//-----------------------------------------
 
 router.delete("/delete/:id", deletePerson);
 

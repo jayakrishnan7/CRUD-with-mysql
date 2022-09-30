@@ -148,7 +148,7 @@ const updateTheUser = async (req: Request, res: Response) => {
   }
 };
 
-// ....... delete user...................
+// ........permanent delete user...................
 // const deletePerson = async (req: Request, res: Response) => {
 //   try {
 //     await UserModel.findByIdAndDelete(req.params.id);
@@ -158,6 +158,8 @@ const updateTheUser = async (req: Request, res: Response) => {
 //     res.status(500).send(error);
 //   }
 // };
+
+
 
 // .......soft delete user...................
 const deletePerson = async (req: Request, res: Response) => {

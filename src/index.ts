@@ -1,6 +1,6 @@
 import express from 'express';
-import { router } from "./routes/routes";
 import connects  from './config/db';
+import { router } from './routes/routes';
 
 // cross origin resource sharing............
 const cors = require('cors');

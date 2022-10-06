@@ -3,8 +3,9 @@ import moment from "moment";
 import UserModel from "../models/users";
 // import * as excelJS from 'exceljs'
 
-const fs = require("fs");
 const reader = require("xlsx");
+const nodemailer = require("nodemailer");
+
 
 // const excelUser = require('../models/excelUser')
 const excelJS = require("exceljs");
@@ -274,7 +275,7 @@ const exportUsers = async (req: Request, res: Response) => {
   let fromDate: any =  req.query.dobFrom;
   let lastDate: any =  req.query.dobTo;
   
-  console.log("reeeeeeeeeeeeee.........", fromDate, lastDate);
+  // console.log("reeeeeeeeeeeeee.........", fromDate, lastDate);
    
   const fDate = moment.utc(fromDate, "YYYY/MM/DD").toDate();
   moment().format();
@@ -282,19 +283,20 @@ const exportUsers = async (req: Request, res: Response) => {
   const workbook = new excelJS.Workbook();
 
   const worksheet = workbook.addWorksheet("excelUsers");
-  const path = "../../public/assets/";
 
-  console.log("path addeddd...........", path);
+  // const path = "../../public/assets/";
+
+  // console.log("path addeddd...........", path);
 
   worksheet.columns = [
     { header: "S no.", key: "_id", width: 10 },
     { header: "class no.", key: "classNumber", width: 10 },
     { header: "Name", key: "name", width: 10 },
     { header: "Email Id", key: "email", width: 10 },
-    { header: "Password", key: "password", width: 10 },
+    // { header: "Password", key: "password", width: 10 },
     { header: "Phone", key: "phone", width: 10 },
     { header: "Date of Birth", key: "dob", width: 10 },
-    { header: "Photo", key: "photo", width: 10 },
+    // { header: "Photo", key: "photo", width: 10 },
     { header: "delete status", key: "isDeleted", width: 10 },
   ];
 
@@ -311,7 +313,7 @@ const exportUsers = async (req: Request, res: Response) => {
     },
   });
 
-  console.log("user coming...........", User);
+  // console.log("user coming...........", User);
 
   User.forEach((user) => {
     user.classNumber = counter;
@@ -319,43 +321,21 @@ const exportUsers = async (req: Request, res: Response) => {
     counter++;
   });
 
-  // worksheet.addRow({ _id: "3444433333334333", name: "meera", classNumber: 1, email: "meera@gmail.com", password: "3dsfadfd",  phone: "8383838384", dob: "12-03-2020", photo: " ", isDeleted: false });
-  //  worksheet.addRow({classNumber: 1, name: "haaari", email: "haaari@gmail.com", phone: "8383838384", dob: "12-03-2021"});
-
   worksheet.getRow(1).eachCell((cell: any) => {
     cell.font = { bold: true };
   });
 
   try {
-    // res.setHeader(
-    //   "Content-Type",
-    //   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    //   );
-    //   res.setHeader("Content-Disposition", `attachment; filename=users.xlsx`);
+ 
+    // console.log("reaaaaaaaaaachhhhhhhh.........");
 
-    console.log("reaaaaaaaaaachhhhhhhh.........");
-
-    //   // return workbook.xlsx.write(res).then(() => {
-    //     //   res.status(200);
-    //     // });
-
-    //     const writing =  await workbook.xlsx.writeFile('./../../public/assets/files/').then(() => {
-    //       res.send({
-    //     status: "success",
-    //     message: "file successfully downloaded",
-    //     path: `${path}/users.xlsx`,
-    //   });
-
-    // console.log('paaaaaaaaaaaaath', path);
-    // console.log(workbook);
-
-    const data = await workbook.xlsx.writeFile('success.xlsx');
-    console.log("wwwwwwwww", data);
+    const data = await workbook.xlsx.writeFile('excelSheet ' + fromDate + '-' + lastDate + '.xlsx');
+    
 
     res.send({
       status: "success",
       message: "file successfully downloaded",
-      path: `${path}/users.xlsx`,
+      // path: `${path}/users.xlsx`,
     });
 
     // })
@@ -366,6 +346,13 @@ const exportUsers = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+
+
+
+
+
 
 export {
   allUsers,

@@ -2,6 +2,8 @@ import express from 'express';
 import connects  from './server/config/db';
 import { router } from './server/routes/routes';
 
+const path = require('path')
+
 // cross origin resource sharing............
 const cors = require('cors');
 
@@ -26,6 +28,11 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
+
+
+//make files as static........
+app.use('/files', express.static(path.join(__dirname, "./public/assets/files")));
+
 
 // route ......................
 app.use('/', router);

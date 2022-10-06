@@ -1,6 +1,13 @@
 import express, { Request, Response } from "express";
 import moment from "moment";
 import UserModel from "../models/users";
+// import * as excelJS from 'exceljs'
+
+const fs = require("fs");
+const reader = require("xlsx");
+
+// const excelUser = require('../models/excelUser')
+const excelJS = require("exceljs");
 
 //importing crypto module to generate random binary data
 var CryptoJS = require("crypto-js");
@@ -12,18 +19,6 @@ const allUsers = async (req: Request, res: Response) => {
 
   let myData = await UserModel.find().skip(skip);
   // .limit(limit);
-
-  // console.log('mydddddddd', myData);
-
-  // let newUserData: any = myData.map((x) => {
-
-  //   x.password = "********";
-
-  //   return x;
-
-  // })
-
-  // console.log('its newwwwwww', newUserData);
 
   res.json({
     message: "Users Page",
@@ -159,17 +154,17 @@ const updateTheUser = async (req: Request, res: Response) => {
 //   }
 // };
 
-
-
 // .......soft delete user...................
 const deletePerson = async (req: Request, res: Response) => {
   try {
-    const person: any = await UserModel.updateOne({ _id: req.params.id }, {$set: { isDeleted: true }});
+    const person: any = await UserModel.updateOne(
+      { _id: req.params.id },
+      { $set: { isDeleted: true } }
+    );
 
     res.json({
-      message: "User deleted Successfully.."
-    })
-
+      message: "User deleted Successfully..",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -227,6 +222,7 @@ const searchUsers = async (req: Request, res: Response) => {
   }
 };
 
+
 // function of searching users...................
 function createAdvanceQuery(reqData: any) {
   return new Promise((res, rej) => {
@@ -271,15 +267,105 @@ function createAdvanceQuery(reqData: any) {
   });
 }
 
+
+
 const exportUsers = async (req: Request, res: Response) => {
+  
+  let fromDate: any =  req.query.dobFrom;
+  let lastDate: any =  req.query.dobTo;
+  
+  console.log("reeeeeeeeeeeeee.........", fromDate, lastDate);
+   
+  const fDate = moment.utc(fromDate, "YYYY/MM/DD").toDate();
+  moment().format();
+
+  const workbook = new excelJS.Workbook();
+
+  const worksheet = workbook.addWorksheet("excelUsers");
+  const path = "../../public/assets/";
+
+  console.log("path addeddd...........", path);
+
+  worksheet.columns = [
+    { header: "S no.", key: "_id", width: 10 },
+    { header: "class no.", key: "classNumber", width: 10 },
+    { header: "Name", key: "name", width: 10 },
+    { header: "Email Id", key: "email", width: 10 },
+    { header: "Password", key: "password", width: 10 },
+    { header: "Phone", key: "phone", width: 10 },
+    { header: "Date of Birth", key: "dob", width: 10 },
+    { header: "Photo", key: "photo", width: 10 },
+    { header: "delete status", key: "isDeleted", width: 10 },
+  ];
+
+  let counter = 1;
+
+  // lastDate = lastDate + 'T23:59:59';
+
+
+  const User = await UserModel.find({
+    //query today up to tonight
+    dob: {
+      $gte: fromDate,
+      $lt: lastDate
+    },
+  });
+
+  console.log("user coming...........", User);
+
+  User.forEach((user) => {
+    user.classNumber = counter;
+    worksheet.addRow(user);
+    counter++;
+  });
+
+  // worksheet.addRow({ _id: "3444433333334333", name: "meera", classNumber: 1, email: "meera@gmail.com", password: "3dsfadfd",  phone: "8383838384", dob: "12-03-2020", photo: " ", isDeleted: false });
+  //  worksheet.addRow({classNumber: 1, name: "haaari", email: "haaari@gmail.com", phone: "8383838384", dob: "12-03-2021"});
+
+  worksheet.getRow(1).eachCell((cell: any) => {
+    cell.font = { bold: true };
+  });
 
   try {
-    
-  } catch (error) {
-    
-  }
+    // res.setHeader(
+    //   "Content-Type",
+    //   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    //   );
+    //   res.setHeader("Content-Disposition", `attachment; filename=users.xlsx`);
 
-}
+    console.log("reaaaaaaaaaachhhhhhhh.........");
+
+    //   // return workbook.xlsx.write(res).then(() => {
+    //     //   res.status(200);
+    //     // });
+
+    //     const writing =  await workbook.xlsx.writeFile('./../../public/assets/files/').then(() => {
+    //       res.send({
+    //     status: "success",
+    //     message: "file successfully downloaded",
+    //     path: `${path}/users.xlsx`,
+    //   });
+
+    // console.log('paaaaaaaaaaaaath', path);
+    // console.log(workbook);
+
+    const data = await workbook.xlsx.writeFile('success.xlsx');
+    console.log("wwwwwwwww", data);
+
+    res.send({
+      status: "success",
+      message: "file successfully downloaded",
+      path: `${path}/users.xlsx`,
+    });
+
+    // })
+  } catch (error) {
+    res.send({
+      status: "error",
+      message: "Something went wrong",
+    });
+  }
+};
 
 export {
   allUsers,
@@ -288,5 +374,5 @@ export {
   updateTheUser,
   deletePerson,
   searchUsers,
-  exportUsers
+  exportUsers,
 };

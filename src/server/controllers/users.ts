@@ -309,6 +309,10 @@ const exportUsers = async (req: Request, res: Response) => {
       "excelSheet " + fromDate + "-" + lastDate + ".xlsx"
     );
 
+     const buffer = await workbook.xlsx.writeBuffer('excelSheet of student ' + fromDate + '-' + lastDate + '.xlsx');
+
+    // console.log('bbbbbbbbb', buffer);
+
 
     let mailTransporter = nodemailer.createTransport({
       service: "gmail",
@@ -320,12 +324,21 @@ const exportUsers = async (req: Request, res: Response) => {
 
     let details = {
       from: "jayakrishnan@scriptlanes.com",
-      to: "jayakrishnansfc43@gmail.com",
+      to: "prathmesh@scriptlanes.com",
       subject: "Student details in Excel file",
-      text: "Testing out first sender"
+      // text: "Testing out first sender"
+      html: 'content',
+        attachments: [
+            {
+                buffer,
+                content: buffer,
+                contentType:
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            },
+        ],
     }
 
-    mailTransporter.sendMail(details, (err: any) => {
+    await mailTransporter.sendMail(details, (err: any) => {
       if(err) {
         console.log('There is an error ...', err);
         
@@ -337,9 +350,7 @@ const exportUsers = async (req: Request, res: Response) => {
     })
 
 
-    // const buffer = await workbook.xlsx.writeBuffer('excelSheet ' + fromDate + '-' + lastDate + '.xlsx');
-
-    // console.log('bbbbbbbbb', buffer);
+   
 
 
     // const mailOptions = {

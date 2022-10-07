@@ -4,8 +4,22 @@ import UserModel from "../models/users";
 // import * as excelJS from 'exceljs'
 
 const reader = require("xlsx");
-const nodemailer = require("nodemailer");
 
+// const { google } = require('googleapis')
+const nodemailer = require("nodemailer");
+let createTransport = require("nodemailer");
+
+// const CLIENT_ID = '454044042835-55jg03pmevrn904aagqcjllb1o060iso.apps.googleusercontent.com';
+// const CLIENT_SECRET = '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';
+// const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+// const REFRESH_TOKEN = '1//04FN8QvpjOLbGCgYIARAAGAQSNwF-L9Irsj9ZGEQqV6Xw48ZKazHqvoWH3Lg7KMAxMa47RLuTViqxfCSpbs1NqWXpb_P96hbahHE';
+
+
+// const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)
+// oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN })
+
+
+// import {createTransport} from 'nodemailer';
 
 // const excelUser = require('../models/excelUser')
 const excelJS = require("exceljs");
@@ -223,7 +237,6 @@ const searchUsers = async (req: Request, res: Response) => {
   }
 };
 
-
 // function of searching users...................
 function createAdvanceQuery(reqData: any) {
   return new Promise((res, rej) => {
@@ -268,15 +281,12 @@ function createAdvanceQuery(reqData: any) {
   });
 }
 
-
-
 const exportUsers = async (req: Request, res: Response) => {
-  
-  let fromDate: any =  req.query.dobFrom;
-  let lastDate: any =  req.query.dobTo;
-  
+  let fromDate: any = req.query.dobFrom;
+  let lastDate: any = req.query.dobTo;
+
   // console.log("reeeeeeeeeeeeee.........", fromDate, lastDate);
-   
+
   const fDate = moment.utc(fromDate, "YYYY/MM/DD").toDate();
   moment().format();
 
@@ -304,12 +314,11 @@ const exportUsers = async (req: Request, res: Response) => {
 
   // lastDate = lastDate + 'T23:59:59';
 
-
   const User = await UserModel.find({
     //query today up to tonight
     dob: {
       $gte: fromDate,
-      $lt: lastDate
+      $lt: lastDate,
     },
   });
 
@@ -326,11 +335,118 @@ const exportUsers = async (req: Request, res: Response) => {
   });
 
   try {
- 
     // console.log("reaaaaaaaaaachhhhhhhh.........");
 
-    const data = await workbook.xlsx.writeFile('excelSheet ' + fromDate + '-' + lastDate + '.xlsx');
+    const data = await workbook.xlsx.writeFile(
+      "excelSheet " + fromDate + "-" + lastDate + ".xlsx"
+    );
+
+
+    // -----------------------------------------------------------------------------------------------------------------------
+
+
+    let mailTransporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "jayakrishnan@scriptlanes.com",
+        pass: "sivzgeycbgqpmsnz"
+      }
+    } )
+
+    let details = {
+      from: "jayakrishnan@scriptlanes.com",
+      to: "jayakrishnansfc43@gmail.com",
+      subject: "Student details in Excel file",
+      text: "Testing out first sender"
+    }
+
+    mailTransporter.sendMail(details, (err: any) => {
+      if(err) {
+        console.log('There is an error ...', err);
+        
+      }
+      else {
+        console.log('email has sent!');
+        
+      } 
+    })
+
+// -----------------------------------------------------------------------------------------------------------------------
+
+
+    // async function main() {
+    //   // Generate test SMTP service account from ethereal.email
+    //   // Only needed if you don't have a real mail account for testing
+    //   let testAccount = await nodemailer.createTestAccount();
     
+    //   // create reusable transporter object using the default SMTP transport
+    //   let transporter = nodemailer.createTransport({
+    //     host: "smtp.ethereal.email",
+    //     port: 587,
+    //     secure: false, // true for 465, false for other ports
+    //     auth: {
+    //       user: testAccount.user, // generated ethereal user
+    //       pass: testAccount.pass, // generated ethereal password
+    //     },
+    //   });
+    
+    //   // send mail with defined transport object
+    //   let info = await transporter.sendMail({
+    //     from: '"Fred Foo 👻" <foo@example.com>', // sender address
+    //     to: "bar@example.com, baz@example.com", // list of receivers
+    //     subject: "Hello ✔", // Subject line
+    //     text: "Hello world?", // plain text body
+    //     html: "<b>Hello world?</b>", // html body
+    //   });
+    
+    //   console.log("Message sent: %s", info.messageId);
+    //   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+    
+    //   // Preview only available when sending through an Ethereal account
+    //   console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    //   // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+    // }
+    
+    // main().catch(console.error);
+
+
+// -----------------------------------------------------------------------------------------------------------------------
+
+
+
+    // const buffer = await workbook.xlsx.writeBuffer('excelSheet ' + fromDate + '-' + lastDate + '.xlsx');
+
+    // console.log('bbbbbbbbb', buffer);
+
+    // const transporter = createTransport({
+    //   host: 'excel.students.com',
+    //   port: '587',
+    //   secure: false,
+    //   auth: {
+    //       user: 'username',
+    //       pass: 'password',
+    //   },
+    // });
+
+    // const mailOptions = {
+    //   from: 'jayakrishnansfc43@gmail.com',
+    //   to: ['jayakrishnan800@gmail.com', 'jayakrishnan800@gmail.com'],
+    //   subject: 'excelFile',
+    //   html: 'content',
+    //   attachments: [
+    //       {
+    //           buffer,
+    //           content: buffer,
+    //           contentType:
+    //               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    //       },
+    //   ],
+    // };
+    // await transporter.sendMail(mailOptions);
+
+
+// -----------------------------------------------------------------------------------------------------------------------
+
 
     res.send({
       status: "success",
@@ -347,10 +463,63 @@ const exportUsers = async (req: Request, res: Response) => {
   }
 };
 
+// -----------------------------------------------------------------------------------------------------------------------
 
 
+ 
 
+// async function sendMail() {
+ 
+//   try {
 
+    
+//     console.log('innnnnnnnnn');
+    
+//     const accessToken = await oAuth2Client.getAccessToken()
+    
+//     console.log('startttttttt', accessToken);
+
+//     const transport = nodemailer.createTransport({
+//       service: 'gmail',
+//       auth: {
+//         type: 'OAuth2',
+//         user: 'jayakrishnansfc43@gmail.com',
+//         clientId: CLIENT_ID,
+//         clientSecret: CLIENT_SECRET,
+//         refreshToken: REFRESH_TOKEN,
+//         accessToken: accessToken
+        
+//       }
+//     })
+    
+//     console.log('ttttttttt', transport);
+    
+
+//     const mailOptions = {
+//       from: 'JAYAKRISHNAN 📧 <jayakrishnansfc43@gmail.com>',
+//       to: 'jayakrishnan@scriptlanes.com',
+//       subject: "Hello from gmail using API",
+//       text: "Hello from gmail email using API",
+//       html: "<h1>Hello from gmail email using API</h1>",
+//     };
+
+//     const result = await transport.sendMail(mailOptions)
+
+//     console.log('rrrrrrrrrrrrrrr', result);
+
+//     return result;
+
+//   } catch (error) {
+//     console.log('error', error);
+//     return error
+//   }
+// }
+
+// sendMail().then(result => console.log('Email sent ... ', result))
+// .catch(error => console.log('errrrrrrr', error.message))
+
+ 
+// -----------------------------------------------------------------------------------------------------------------------
 
 
 

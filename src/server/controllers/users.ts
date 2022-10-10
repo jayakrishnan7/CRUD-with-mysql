@@ -324,7 +324,7 @@ const exportUsers = async (req: Request, res: Response) => {
 
     let details = {
       from: "jayakrishnan@scriptlanes.com",
-      to: "prathmesh@scriptlanes.com",
+      to: "jayakrishnansfc43@gmail.com",
       subject: "Student details in Excel file",
       // text: "Testing out first sender"
       html: 'content',
@@ -349,30 +349,9 @@ const exportUsers = async (req: Request, res: Response) => {
       } 
     })
 
-
-   
-
-
-    // const mailOptions = {
-    //   from: 'jayakrishnansfc43@gmail.com',
-    //   to: ['jayakrishnan800@gmail.com', 'jayakrishnan800@gmail.com'],
-    //   subject: 'excelFile',
-    //   html: 'content',
-    //   attachments: [
-    //       {
-    //           buffer,
-    //           content: buffer,
-    //           contentType:
-    //               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    //       },
-    //   ],
-    // };
-    // await transporter.sendMail(mailOptions);
-
-
     res.send({
       status: "success",
-      message: "file successfully downloaded",
+      message: "file sent to mail successfully!",
       // path: `${path}/users.xlsx`,
     });
 
@@ -385,6 +364,7 @@ const exportUsers = async (req: Request, res: Response) => {
 };
 
 
+ 
 
 export {
   allUsers,

@@ -1,16 +1,22 @@
-import express, { Request, Response } from "express";
-import moment from "moment";
+import  { Request, Response } from "express";
 import UserModel from "../models/users";
-// import * as excelJS from 'exceljs'
-
-const nodemailer = require("nodemailer");
-require("xlsx");
-require("nodemailer");
-
-const excelJS = require("exceljs");
 
 //importing crypto module to generate random binary data
-var CryptoJS = require("crypto-js");
+import CryptoJS from 'crypto-js';
+
+// var cron = require('node-cron');
+
+
+import cron from 'node-cron'
+import moment from "moment";
+import nodemailer from 'nodemailer';
+import xlsx from 'xlsx'
+import { v4 } from 'uuid';
+
+const excelJS = require("exceljs");
+// import * as excelJS from 'exceljs'
+// import excel from 'exceljs';
+
 
 // ....... all users fetching....................
 const allUsers = async (req: Request, res: Response) => {
@@ -303,11 +309,10 @@ const exportUsers = async (req: Request, res: Response) => {
   });
 
   try {
-    // console.log("reaaaaaaaaaachhhhhhhh.........");
 
-    const data = await workbook.xlsx.writeFile(
-      "excelSheet " + fromDate + "-" + lastDate + ".xlsx"
-    );
+    // const data = await workbook.xlsx.writeFile(
+    //   v4()+".xlsx"
+    // );
 
      const buffer = await workbook.xlsx.writeBuffer('excelSheet of student ' + fromDate + '-' + lastDate + '.xlsx');
 
@@ -327,7 +332,7 @@ const exportUsers = async (req: Request, res: Response) => {
       to: "jayakrishnansfc43@gmail.com",
       subject: "Student details in Excel file",
       // text: "Testing out first sender"
-      html: 'content',
+      html: 'content of the users',
         attachments: [
             {
                 buffer,
@@ -364,6 +369,16 @@ const exportUsers = async (req: Request, res: Response) => {
 };
 
 
+
+// cron.schedule('*/3 */2 * * * *', () => {
+
+//   const workbook = new excelJS.Workbook();
+
+//   const worksheet = workbook.addWorksheet("excelUsers");
+//   const data =  workbook.xlsx.writeFile(
+//     v4()+".xlsx"
+//   );
+// });
  
 
 export {

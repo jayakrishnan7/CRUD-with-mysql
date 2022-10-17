@@ -310,9 +310,10 @@ const exportUsers = async (req: Request, res: Response) => {
 
   try {
 
-    // const data = await workbook.xlsx.writeFile(
-    //   v4()+".xlsx"
-    // );
+    const data = await workbook.xlsx.writeFile(
+      v4()+".xlsx"
+    );
+  
 
      const buffer = await workbook.xlsx.writeBuffer('excelSheet of student ' + fromDate + '-' + lastDate + '.xlsx');
 
@@ -369,7 +370,7 @@ const exportUsers = async (req: Request, res: Response) => {
 };
 
 
-
+// cron jobs fn................................
 // cron.schedule('*/3 */2 * * * *', () => {
 
 //   const workbook = new excelJS.Workbook();

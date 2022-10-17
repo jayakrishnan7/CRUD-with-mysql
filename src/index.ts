@@ -37,6 +37,48 @@ app.use('/files', express.static(path.join(__dirname, "./public/assets/files")))
 // route ......................
 app.use('/', router);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// import cron from 'node-cron'
+// import { v4 } from 'uuid';
+// const excelJS = require("exceljs");
+// import UserModel from "./server/models/users";
+
+// const workbook = new excelJS.Workbook();
+// const worksheet = workbook.addWorksheet("excelUsers");
+
+// worksheet.columns = [
+//     { header: "S no.", key: "_id", width: 10 },
+//     { header: "class no.", key: "classNumber", width: 10 },
+//     { header: "Name", key: "name", width: 10 },
+//     { header: "Email Id", key: "email", width: 10 },
+//     { header: "Phone", key: "phone", width: 10 },
+//     { header: "Date of Birth", key: "dob", width: 10 },
+//     { header: "delete status", key: "isDeleted", width: 10 },
+//   ];
+
+//   let counter = 1;
+
+//   const User =  UserModel.find()
+//   User.forEach((user: any) => {
+//     user.classNumber = counter;
+//     worksheet.addRow(user);
+//     counter++;
+//   });
+
+//   worksheet.getRow(1).eachCell((cell: any) => {
+//     cell.font = { bold: true };
+//   });
+
+// // node cron job fn.............
+// cron.schedule('*/3 */2 * * * *', () => {
+
+//     const data =  workbook.xlsx.writeFile(
+//       v4()+".xlsx"
+//     );
+//   });
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // server connection

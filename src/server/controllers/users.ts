@@ -1,6 +1,8 @@
 import  { Request, Response } from "express";
 import UserModel from "../models/users";
 
+import execQuery from '../config/db'
+
 //importing crypto module to generate random binary data
 import CryptoJS from 'crypto-js';
 

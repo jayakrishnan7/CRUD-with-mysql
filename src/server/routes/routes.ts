@@ -1,4 +1,7 @@
 import express from "express";
+
+// import execQuery from "../config/db";
+
 import {
   createPerson,
   deletePerson,
@@ -6,7 +9,6 @@ import {
   exportUsers,
   allUsers,
   updateUser,
-  updateTheUser,
 } from "../controllers/users";
 
 const router = express.Router();
@@ -14,10 +16,6 @@ const router = express.Router();
 router.post("/register", createPerson);
 
 router.put("/updateUser/:id", updateUser);
-
-// update the class no incrementing one....
-router.put("/updateUserWithClass", updateTheUser);
-//-----------------------------------------
 
 router.delete("/delete/:id", deletePerson);
 

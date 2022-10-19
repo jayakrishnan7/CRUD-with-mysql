@@ -1,37 +1,45 @@
-import  { Request, Response } from "express";
+import { Request, Response } from "express";
 import UserModel from "../models/users";
 
-import execQuery from '../config/db'
+import mysql from "mysql";
+import execQuery from "../config/db";
+
+// var pool = mysql.createConnection({
+var pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "root",
+  database: "crud",
+});
 
 //importing crypto module to generate random binary data
-import CryptoJS from 'crypto-js';
+import CryptoJS from "crypto-js";
 
 // var cron = require('node-cron');
 
-
-import cron from 'node-cron'
+import cron from "node-cron";
 import moment from "moment";
-import nodemailer from 'nodemailer';
-import xlsx from 'xlsx'
-import { v4 } from 'uuid';
+import nodemailer from "nodemailer";
+import xlsx from "xlsx";
+import { v4 } from "uuid";
 
 const excelJS = require("exceljs");
 // import * as excelJS from 'exceljs'
 // import excel from 'exceljs';
-
 
 // ....... all users fetching....................
 const allUsers = async (req: Request, res: Response) => {
   let skip = 0;
   let limit = 10;
 
-  let myData = await UserModel.find().skip(skip);
-  // .limit(limit);
-
-  res.json({
-    message: "Users Page",
-    myData: myData,
-    // newUserData,
+  pool.query("SELECT * FROM students", (err, result, fields) => {
+    if (err) {
+      console.log(err);
+      res.send({ status: 0, data: err });
+    } else {
+      console.log(result);
+      res.send({ status: 0, data: result });
+    }
   });
 };
 
@@ -42,6 +50,8 @@ const createPerson = async (req: Request, res: Response) => {
       req.body;
 
     const pswd = req.body.password;
+
+    // console.log('greattttttttt......', req.body);
 
     // ...........................................password.encrypting............................................
     var ciphertext = CryptoJS.AES.encrypt(pswd, "crud secret 763").toString();
@@ -66,32 +76,76 @@ const createPerson = async (req: Request, res: Response) => {
       isDeleted: req.body.isDeleted,
     };
 
-    // console.log("userdddddddddddd", userData);
+    // console.log('boddddd...............', name);
 
-    const user = await UserModel.create(userData);
+    const checkUsername = `Select name FROM students WHERE name = ${req.body.name}`;
+    // execQuery(checkUsername, [])
 
-    console.log("uuuuuu  user", user);
+    // console.log('res..........',execQuery.toString());
 
-    // ...........................................password.decrypting.....................................................
+    pool.query(checkUsername, [name], (err, result, fields) => {
+      // console.log('rrrrrrrrrrrrrrrrr', result?.length);
 
-    const decryptUser = userData.password;
+      if (!result?.length) {
+        console.log("its a chance..........");
 
-    // console.log('deccccccrypt userrr', decryptUser);
+        const sql = `Insert Into students (
+          name, 
+          classNumber, 
+          email, 
+          password, 
+          phone, 
+          dob,  
+          photo, 
+          isDeleted
+          ) VALUES ( ?, ?, ?,  ?, ?, ?, ?,  ? )`;
+        pool.query(
+          sql,
+          [
+            userData.name,
+            userData.classNumber,
+            userData.email,
+            userData.password,
+            userData.phone,
+            userData.dob,
+            userData.photo,
+            userData.isDeleted,
+          ],
+          (err, result, fields) => {
+            if (err) {
+              res.send({ status: 0, data: err });
+            } else {
+              // result.forEach((element: any) => {
+              //   if(element.constructor == Array) {
+              //     res.send('Inserted student id:  ' + element[0].id)
+              //   }
+              // })
+              res.send({ status: 1, data: result });
+            }
+          }
+        );
+      }
 
-    var bytes = CryptoJS.AES.decrypt(decryptUser, "crud secret 763");
-    var originalText = bytes.toString(CryptoJS.enc.Utf8);
 
-    // console.log("decrypted password..........", originalText);
 
-    // ------------------------------------------------------------------------------------------------------------------
+      // ...........................................password.decrypting.....................................................
 
-    res.status(201).json({ user: user._id, created: true });
+      const decryptUser = userData.password;
+
+      // console.log('deccccccrypt userrr', decryptUser);
+
+      var bytes = CryptoJS.AES.decrypt(decryptUser, "crud secret 763");
+      var originalText = bytes.toString(CryptoJS.enc.Utf8);
+
+      console.log("decrypted password..........", originalText);
+
+      // ------------------------------------------------------------------------------------------------------------------
+
+    });
+
   } catch (error) {
     console.log("errrrr", error);
-    res.status(500).json({
-      error,
-      created: false,
-    });
+    res.send({ status: 0, error: error });
   }
 };
 
@@ -110,46 +164,6 @@ const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-// ....... edit user with classnumber....................
-const updateTheUser = async (req: Request, res: Response) => {
-  try {
-    console.log("updating userrr");
-
-    const classNumber: any = req.query.classNumber;
-    const name: any = req.query.name;
-
-    const classNum = parseInt(classNumber);
-
-    // console.log('reaach', typeof(classNum));
-
-    if (!classNum && !name) {
-      console.log("Please fill all the details....");
-      res.status(500).send("Please fill all the details....");
-    } else if (!classNum) {
-      console.log("class null");
-      res.status(500).send("Please provide the class number");
-    } else if (!name) {
-      console.log("name null");
-      res.status(500).send("Please provide the name");
-    } else if (classNum && name) {
-      const update = await UserModel.updateMany(
-        { name: { $regex: name }, classNumber: classNum },
-        { $inc: { classNumber: 1 } }
-      );
-
-      const updatedData = await UserModel.find({
-        name: { $regex: name },
-        classNumber: classNum + 1,
-      });
-
-      // console.log("updatedddd", updatedData);
-
-      res.json({ message: "success. class incremented...", data: updatedData });
-    }
-  } catch (error) {
-    res.status(500).send("Class not incremented. error!!!");
-  }
-};
 
 // ........permanent delete user...................
 // const deletePerson = async (req: Request, res: Response) => {
@@ -200,7 +214,6 @@ const searchUsers = async (req: Request, res: Response) => {
 
     let totalCount = await UserModel.find(finalQuery).count();
     let users = await UserModel.find(finalQuery).limit(limit);
-
 
     if (users.length == 0) {
       res.send("No users with this details!!!");
@@ -290,8 +303,7 @@ const exportUsers = async (req: Request, res: Response) => {
 
   let counter = 1;
 
-  const User = await UserModel.find(
-    {
+  const User = await UserModel.find({
     dob: {
       $gte: fromDate,
       $lt: lastDate,
@@ -311,58 +323,51 @@ const exportUsers = async (req: Request, res: Response) => {
   });
 
   try {
+    const data = await workbook.xlsx.writeFile(v4() + ".xlsx");
 
-    const data = await workbook.xlsx.writeFile(
-      v4()+".xlsx"
+    const buffer = await workbook.xlsx.writeBuffer(
+      "excelSheet of student " + fromDate + "-" + lastDate + ".xlsx"
     );
-  
-
-     const buffer = await workbook.xlsx.writeBuffer('excelSheet of student ' + fromDate + '-' + lastDate + '.xlsx');
 
     // console.log('bbbbbbbbb', buffer);
-
 
     let mailTransporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: "jayakrishnan@scriptlanes.com",
-        pass: "sivzgeycbgqpmsnz"
-      }
-    } )
+        pass: "sivzgeycbgqpmsnz",
+      },
+    });
 
     let details = {
       from: "jayakrishnan@scriptlanes.com",
       to: "jayakrishnansfc43@gmail.com",
       subject: "Student details in Excel file",
       // text: "Testing out first sender"
-      html: 'content of the users',
-        attachments: [
-            {
-                buffer,
-                content: buffer,
-                contentType:
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            },
-        ],
-    }
+      html: "content of the users",
+      attachments: [
+        {
+          buffer,
+          content: buffer,
+          contentType:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        },
+      ],
+    };
 
     await mailTransporter.sendMail(details, (err: any) => {
-      if(err) {
-        console.log('There is an error ...', err);
-        
+      if (err) {
+        console.log("There is an error ...", err);
+      } else {
+        console.log("email has sent!");
       }
-      else {
-        console.log('email has sent!');
-        
-      } 
-    })
+    });
 
     res.send({
       status: "success",
       message: "file sent to mail successfully!",
       // path: `${path}/users.xlsx`,
     });
-
   } catch (error) {
     res.send({
       status: "error",
@@ -370,7 +375,6 @@ const exportUsers = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 // cron jobs fn................................
 // cron.schedule('*/3 */2 * * * *', () => {
@@ -382,13 +386,11 @@ const exportUsers = async (req: Request, res: Response) => {
 //     v4()+".xlsx"
 //   );
 // });
- 
 
 export {
   allUsers,
   createPerson,
   updateUser,
-  updateTheUser,
   deletePerson,
   searchUsers,
   exportUsers,

@@ -33,7 +33,7 @@ app.use(cors({
 
 
 //make files as static........
-app.use('/files', express.static(path.join(__dirname, "./public/assets/files")));
+// app.use('/files', express.static(path.join(__dirname, "./public/assets/files")));
 
 
 // route ......................

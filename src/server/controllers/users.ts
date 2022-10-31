@@ -56,6 +56,9 @@ const allUsers = async (req: Request, res: Response) => {
 // .......  user  sign up   ....................
 const createPerson = async (req: Request, res: Response) => {
   try {
+
+    console.log('rrrrrrrrrrr', req.body);
+    
     const { name, classNumber, email, password, phone, dob, photo, isDeleted } =
       req.body;
 
@@ -440,14 +443,27 @@ const exportUsers = async (req: Request, res: Response) => {
 const uploadFiles = async (req: Request, res: Response) => {
 
   try {
-    
+    // console.log('fffffffffff',req.file);
+    console.log('bbbbbbbbbbbb',req.files);
+    // res.json({ message: "Successfully uploaded files" });
 
+    
+    res.status(200).json({
+      status: "success",
+      message: "File created successfully!!",
+    });
+    
 
   } catch (error) {
     console.log(error);
-    
+    res.json({error})
   }
 }
+
+
+
+
+
 
 export {
   allUsers,

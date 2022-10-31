@@ -1,6 +1,7 @@
 import express from 'express';
 import { router } from './server/routes/routes';
-import execQuery from './server/config/db'
+// import execQuery from './server/config/db'
+
 
 // requireing path module...................
 const path = require('path')

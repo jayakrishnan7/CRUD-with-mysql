@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import UserModel from "../models/users";
 
 import mysql from "mysql";
 // import execQuery from "../config/db";
@@ -21,9 +20,6 @@ import xlsx from "xlsx";
 
 // creating unique id........
 import { v4 } from "uuid";
-
-// multer for file uploads....
-import multer from "multer";
 
 const excelJS = require("exceljs");
 // import * as excelJS from 'exceljs'
